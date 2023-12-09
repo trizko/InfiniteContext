@@ -1,9 +1,13 @@
-from llm import llm
+import os
+
+from dotenv import load_dotenv
+from llm import LLM
+
+load_dotenv()
 
 def main():
-
     print("Starting the conversation. Type 'quit' to exit.")
-    chat_helper = llm()
+    chat_helper = LLM(api_key=os.getenv("OPENAI_API_KEY"), debug=True)
 
     while True:
         user_input = input("\n\033[92mYou:\033[0m ")

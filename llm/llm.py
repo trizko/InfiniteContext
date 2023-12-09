@@ -1,10 +1,10 @@
 from openai import OpenAI
 
-class llm:
-    def __init__(self):
-        self.full_message_history = [] # This is the full conversation history https://platform.openai.com/docs/api-reference/chat/object . 
-        self.client = OpenAI(api_key='') # <== Put API key provided in the challenge email here.
-        self.DEBUG = False # Set this to True to see the context window being sent to the LLM.
+class LLM:
+    def __init__(self, api_key, debug=False):
+        self.full_message_history = []
+        self.client = OpenAI(api_key=api_key)
+        self.DEBUG = debug
         if self.client.api_key == '':
             raise ValueError("\033[91m Please enter the OpenAI API key which was provided in the challenge email into llm.py.\033[0m")
 
@@ -114,51 +114,51 @@ class llm:
         return response
 
     
-def gpt4_one_shot(self, system_prompt: str, user_prompt: str, json_response: bool = False, model: str = "gpt-4-1106-preview"):
-    """
-    Executes a one-shot completion with the GPT-4 language model, using both a system and a user prompt.
+    def gpt4_one_shot(self, system_prompt: str, user_prompt: str, json_response: bool = False, model: str = "gpt-4-1106-preview"):
+        """
+        Executes a one-shot completion with the GPT-4 language model, using both a system and a user prompt.
 
-    This method is designed for scenarios where a single interaction with the GPT-4 model is required, rather than a 
-    continuous conversation. It allows specifying both a system-level and a user-level prompt to guide the model's response.
+        This method is designed for scenarios where a single interaction with the GPT-4 model is required, rather than a
+        continuous conversation. It allows specifying both a system-level and a user-level prompt to guide the model's response.
 
-    Args:
-        system_prompt (str): The system-level prompt that sets the context or instructions for the model.
-        user_prompt (str): The user's input or question to the model.
-        json_response (bool, optional): If True, forces the response to be in JSON format. Requires a defined response schema.
-                                        Defaults to False.
-        model (str, optional): The specific GPT-4 model version to be used for the completion. Defaults to "gpt-4-1106-preview".
+        Args:
+            system_prompt (str): The system-level prompt that sets the context or instructions for the model.
+            user_prompt (str): The user's input or question to the model.
+            json_response (bool, optional): If True, forces the response to be in JSON format. Requires a defined response schema.
+                                            Defaults to False.
+            model (str, optional): The specific GPT-4 model version to be used for the completion. Defaults to "gpt-4-1106-preview".
 
-    Returns:
-        str: The content of the model's response message as a string.
+        Returns:
+            str: The content of the model's response message as a string.
 
-    Raises:
-        ValueError: If the combined token count of the response and prompts exceeds the 4096 token limit.
+        Raises:
+            ValueError: If the combined token count of the response and prompts exceeds the 4096 token limit.
 
-    Note:
-        - The 'temperature' parameter influences the model's creativity and unpredictability.
-        - The 'max_tokens' parameter sets a limit on the response size.
-        - This method is suitable for tasks like generating content, answering questions, or other one-off tasks.
-    
-    Example:
-        >>> response = gpt4_one_shot("Always respond in French.", "Tell a one scentence poem about a robot's adventure.")
-        >>> print(response)
-        "Un robot solitaire, vers les étoiles il vole, son aventure commence, un rêve qui se dévoile."
-    """
-    # Initialize a one-shot completion with the GPT-4 model
-    response = self.client.chat.completions.create(
-        model=model,  # Specifies the GPT-4 model version
-        temperature=0.79,  # Sets the AI's creativity level
-        max_tokens=4096,  # Limits the response token count
-        response_format={"type": "json_object"} if json_response else None,  # Optional JSON response format
-        messages=[
-            {"role": "system", "content": system_prompt},  # System-level context or instruction
-            {"role": "user", "content": user_prompt}  # User input or question
-        ]
-    )
+        Note:
+            - The 'temperature' parameter influences the model's creativity and unpredictability.
+            - The 'max_tokens' parameter sets a limit on the response size.
+            - This method is suitable for tasks like generating content, answering questions, or other one-off tasks.
 
-    # Check if the total token usage exceeds the limit
-    # DO NOT CHANGE THIS - This is a requirement for the challenge.
-    if response.usage.total_tokens > 4096:
-        raise ValueError("CHALLENGE CONTEXT WINDOW EXCEEDED: The context window now exceeds the 4096 token limit. Please try again with a shorter prompt.")
+        Example:
+            >>> response = gpt4_one_shot("Always respond in French.", "Tell a one scentence poem about a robot's adventure.")
+            >>> print(response)
+            "Un robot solitaire, vers les étoiles il vole, son aventure commence, un rêve qui se dévoile."
+        """
+        # Initialize a one-shot completion with the GPT-4 model
+        response = self.client.chat.completions.create(
+            model=model,  # Specifies the GPT-4 model version
+            temperature=0.79,  # Sets the AI's creativity level
+            max_tokens=4096,  # Limits the response token count
+            response_format={"type": "json_object"} if json_response else None,  # Optional JSON response format
+            messages=[
+                {"role": "system", "content": system_prompt},  # System-level context or instruction
+                {"role": "user", "content": user_prompt}  # User input or question
+            ]
+        )
 
-    return response.choices[0].message.content
+        # Check if the total token usage exceeds the limit
+        # DO NOT CHANGE THIS - This is a requirement for the challenge.
+        if response.usage.total_tokens > 4096:
+            raise ValueError("CHALLENGE CONTEXT WINDOW EXCEEDED: The context window now exceeds the 4096 token limit. Please try again with a shorter prompt.")
+
+        return response.choices[0].message.content
