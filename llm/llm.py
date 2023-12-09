@@ -84,7 +84,11 @@ class LLM:
         Returns:
             list: The context window to be sent to the LLM.
         """
-        return self.full_message_history[-4:]  # Very primitive context window management, truncating the message history to the last 4 messages and losing all prior context.
+        messages_num_tokens = self.num_tokens(self.full_message_history)
+        if messages_num_tokens > 1024:
+            self.full_message_history = self.summarize(self.full_message_history)
+        return self.full_message_history
+
 
     def send_message(self, prompt: str, role: str = 'user', json_response: bool = False):
         """
