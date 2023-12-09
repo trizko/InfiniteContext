@@ -35,6 +35,47 @@ class LLM:
         num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
         return num_tokens
 
+
+    def summarize(self, messages: list):
+        """
+        This function summarizes a list of messages in the GPT API chat completion format.
+
+        Args:
+            messages (list): The list of messages to be summarized.
+
+        Returns:
+            list: The summarized list of messages.
+        """
+
+        summary_prompt = """
+        Summarize the following JSON representation of a conversation between a
+        human and a chatbot. The summary MUST be under 1024 tokens in length.
+        This will be used as a reference for an infinitely long running
+        conversation. Please be sure to keep anything you think would be
+        important in the future of this conversation. Return your results as a
+        JSON. Use the following example as a reference for what schema to
+        return the JSON as:
+
+        {
+            "summary": [
+                {"role": "system", 'content': "The conversation's messages before the final assistant response have been summarized."}
+                {"role": "assistant", "content": "I asked the user how I may help them."},
+                {"role": "user", "content": "write djikstra's algorithm in 5 different programming languages."},
+                {"role": "assistant", "content": "I shared code snippets for Dijkstra's algorithm in the specified languages, noting that actual data structures might require additional code."},
+                {"role": "user", "content": "Now write it in GDScript."}
+            ]
+        }
+        """
+        ai_message_json = self.gpt4_one_shot(
+            system_prompt=summary_prompt,
+            user_prompt=json.dumps(messages),
+            json_response=True
+        )
+        ai_message = json.loads(ai_message_json)
+
+        return ai_message["summary"]
+
+
     def manage_context_window(self):
         """
         #~#~#~# CONTEXT WINDOW MANAGEMENT CHALLENGE #~#~#~#
