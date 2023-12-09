@@ -1,12 +1,39 @@
+import json
+
 from openai import OpenAI
+from tiktoken import encoding_for_model
 
 class LLM:
     def __init__(self, api_key, debug=False):
         self.full_message_history = []
+        self.tokenizer = encoding_for_model("gpt-4")
         self.client = OpenAI(api_key=api_key)
         self.DEBUG = debug
-        if self.client.api_key == '':
-            raise ValueError("\033[91m Please enter the OpenAI API key which was provided in the challenge email into llm.py.\033[0m")
+
+
+    def num_tokens(self, messages: list):
+        """
+        This is a helper function for counting tokens in the GPT API messages of a list.
+
+        This was referenced from the following OpenAI examples notebook: https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
+
+        Args:
+            messages (list): The list of messages to count the number of tokens for.
+
+        Returns:
+            int: The number of tokens used by a list of messages.
+        """
+        tokens_per_message = 3
+        tokens_per_name = 1
+        num_tokens = 0
+        for message in messages:
+            num_tokens += tokens_per_message
+            for key, value in message.items():
+                num_tokens += len(self.tokenizer.encode(value))
+                if key == "name":
+                    num_tokens += tokens_per_name
+        num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
+        return num_tokens
 
     def manage_context_window(self):
         """
